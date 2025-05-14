@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#c51230">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Woody's Brewing Company - Inventory System</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiSW52ZW50b3J5IFN5c3RlbSIsInNob3J0X25hbWUiOiJJbnZlbnRvcnkiLCJ0aGVtZV9jb2xvciI6IiNjNTEyMzAiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZmZmZmZiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsInN0YXJ0X3VybCI6Ii4vaW5kZXguaHRtbCJ9">
+    <style>
+        :root {
+            --primary-color: #c51230;
+            --primary-dark: #a30f27;
+            --light-bg: #f5f5f5;
+            --text-color: #333;
+            --border-color: #ddd;
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+            --danger-color: #F44336;
+            --spacing: 10px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            color: var(--text-color);
+            background-color: #fff;
+            -webkit-text-size-adjust: 100%;
+            height: 100%;
+            width: 100%;
+            overscroll-behavior: none;
+        }
+        
+        body {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0;
+            position: relative;
+            font-size: 16px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+            margin: 20px 0 15px 0;
+            font-size: 1.3rem;
+        }
+        
+        h3 {
+            margin: 15px 0 10px 0;
+            font-size: 1.1rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: var(--light-bg);
+            font-weight: bold;
+            position: sticky;
+            top: 54px; /* Header height */
+        }
+        
+        tr:nth-child(even) {
+            background-color: rgba(249, 249, 249, 0.7);
+        }
+        
+        .contact-form {
+            background-color: var(--light-bg);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px; /* Prevents zoom on focus in iOS */
+        }
+        
+        .form-group textarea {
+            height: 100px;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin: 5px 0;
+            -webkit-appearance: none;
+        }
+        
+        button:hover, button:active {
+            background-color: var(--primary-dark);
+        }
+        
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #777;
+            font-size: 0.8rem;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .container {
+            padding: 15px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #fff;
+            position: sticky;
+            top: 54px; /* Same as header height */
+            z-index: 900;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .tabs::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Edge */
+        }
+        
+        .tab {
+            padding: 12px 15px;
+            white-space: nowrap;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            color: var(--text-color);
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+            padding-bottom: 50px; /* Space for bottom controls */
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .inventory-controls {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            position: sticky;
+            top: 105px; /* Header + tabs height */
+            background: white;
+            z-index: 800;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .search-box {
+            padding: 12px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .action-buttons button {
+            flex: 1;
+            margin: 0;
+            padding: 10px;
+            min-width: 100px;
+        }
+        
+        .inventory-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .low-stock {
+            background-color: #fff0f0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            -webkit-appearance: none;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            background-color: white;
+            position: relative;
+        }
+        
+        .checklist-item input[type="checkbox"]:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .checklist-item input[type="checkbox"]:checked:after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 8px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-right: 15px;
+        }
+        
+        .status-good {
+            background-color: var(--success-color);
+        }
+        
+        .status-warning {
+            background-color: var(--warning-color);
+        }
+        
+        .status-critical {
+            background-color: var(--danger-color);
+        }
+        
+        .item-details {
+            flex: 1;
+        }
+        
+        .inventory-count {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .inventory-count span {
+            margin-right: 10px;
+            min-width: 90px;
+        }
+        
+        .inventory-count input {
+            width: 60px;
+            padding: 8px;
+            margin: 0 10px 0 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            text-align: center;
+            font-size: 16px;
+            -moz-appearance: textfield; /* Firefox */
+        }
+        
+        .inventory-count input::-webkit-outer-spin-button,
+        .inventory-count input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        .chart-container {
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .stock-level {
+            display: inline-block;
+            min-width: 70px;
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        
+        .stock-high {
+            background-color: var(--success-color);
+        }
+        
+        .stock-medium {
+            background-color: var(--warning-color);
+        }
+        
+        .stock-low {
+            background-color: var(--danger-color);
+        }
+
+        .save-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+            z-index: 1000;
+            font-size: 24px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* iOS specific styles */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            
+            header {
+                padding-top: calc(15px + env(safe-area-inset-top));
+            }
+            
+            .save-fab {
+                bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+        }
+        
+        @media print {
+            .contact-form, footer, .tabs, .inventory-controls, button, .save-fab {
+                display: none;
+            }
+            
+            body {
+                font-size: 12px;
+            }
+            
+            header {
+                background-color: white;
+                color: black;
+                position: static;
+            }
+            
+            .tab-content {
+                display: block;
+            }
+            
+            .inventory-controls {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Woody's Brewing Company</h1>
+        <p>Inventory System</p>
+    </header>
+    
+    <div class="tabs">
+        <div class="tab active" data-tab="inventory">Inventory</div>
+        <div class="tab" data-tab="checklist">Checklist</div>
+        <div class="tab" data-tab="analytics">Analytics</div>
+        <div class="tab" data-tab="pricing">Pricing</div>
+        <div class="tab" data-tab="order">Order</div>
+    </div>
+    
+    <div class="container">
+    
+    <div id="inventory" class="tab-content active">
+        <div class="inventory-controls">
+            <input type="text" id="inventorySearch" class="search-box" placeholder="Search for items...">
+            <div class="action-buttons">
+                <button id="exportInventory">Export Data</button>
+                <button id="printInventory">Print</button>
+            </div>
+        </div>
+        
+        <h2>Current Inventory Status</h2>
+        
+        <div id="inventoryList">
+            <!-- Food Packaging Category -->
+            <h3>Food Packaging</h3>
+            
+            <div class="inventory-item" data-sku="99047906" data-category="Food Packaging">
+                <div class="item-header">
+                    <strong>Aluminum Foil Roll</strong> - SKU: 99047906
+                    <span class="stock-level stock-medium">MEDIUM</span>
+                </div>
+                <p>Standard Weight, Silver, 18" x 500' - $23.04</p>
+                <div class="inventory-count">
+                    <span>Current Stock:</span>
+                    <input type="number" class="stock-input" min="0" value="2">
+                    <span>Last Check: 5/10/2025</span>
+                </div>
+                <div class="inventory-count">
+                    <span>Reorder Level:</span>
+                    <input type="number" class="reorder-input" min="0" value="1">
+                    <span>Par Level:</span>
+                    <input type="number" class="par-input" min="0" value="3">
+                </div>
+            </div>
+            
+            <div class="inventory-item" data-sku="99514695" data-category="Food Packaging">
+                <div class="item-header">
+                    <strong>Foodservice Film</strong> - SKU: 99514695
+                    <span class="stock-level stock-low">LOW</span>
+                </div>
+                <p>Standard, 18" x 2,000 ft BWK7204 - $20.55</p>
+                <div class="inventory-count">
+                    <span>Current Stock:</span>
+                    <input type="number" class="stock-input" min="0" value="1">
+                    <span>Last Check: 5/11/2025</span>
+                </div>
+                <div class="inventory-count">
+                    <span>Reorder Level:</span>
+                    <input type="number" class="reorder-input" min="0" value="2">
+                    <span>Par Level:</span>
+                    <input type="number" class="par-input" min="0" value="4">
+                </div>
+            </div>
+            
+            <!-- More items for each category - dynamically generated in real app -->
+        </div>
+        <div id="saveFabInventory" class="save-fab">💾</div>
+    </div>
+    
+    <div id="checklist" class="tab-content">
+        <div class="inventory-controls">
+            <input type="text" id="checklistSearch" class="search-box" placeholder="Search checklist...">
+            <div class="action-buttons">
+                <button id="checkAll">Mark All Checked</button>
+                <button id="printChecklist">Print Checklist</button>
+            </div>
+        </div>
+        
+        <h2>Inventory Checklist - <span id="todayDate">5/14/2025</span></h2>
+        
+        <div id="checklistContainer">
+            <!-- Food Packaging -->
+            <h3>Food Packaging</h3>
+            
+            <div class="checklist-item" data-sku="99047906">
+                <input type="checkbox" class="item-check">
+                <div class="status-indicator status-warning"></div>
+                <div class="item-details">
+                    <strong>Aluminum Foil Roll</strong> - SKU: 99047906
+                    <p>Standard Weight, Silver, 18" x 500'</p>
+                    <div class="inventory-count">
+                        <span>Current Count:</span>
+                        <input type="number" class="count-input" min="0" value="0">
+                        <span>Par Level: 3</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="checklist-item" data-sku="99514695">
+                <input type="checkbox" class="item-check">
+                <div class="status-indicator status-critical"></div>
+                <div class="item-details">
+                    <strong>Foodservice Film</strong> - SKU: 99514695
+                    <p>Standard, 18" x 2,000 ft BWK7204</p>
+                    <div class="inventory-count">
+                        <span>Current Count:</span>
+                        <input type="number" class="count-input" min="0" value="0">
+                        <span>Par Level: 4</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- More checklist items -->
+        </div>
+        
+        <div id="saveFabChecklist" class="save-fab">💾</div>
+    </div>
+    
+    <div id="analytics" class="tab-content">
+        <h2>Inventory Usage Analytics</h2>
+        
+        <div class="inventory-controls">
+            <select id="timeRange">
+                <option value="week">Last 7 Days</option>
+                <option value="month">Last 30 Days</option>
+                <option value="quarter">Last 90 Days</option>
+            </select>
+            <div class="action-buttons">
+                <button id="exportAnalytics">Export Data</button>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h3>Usage Trends</h3>
+            <p>This chart would display usage trends over time. In a live version, we'd implement actual charts with a library like Chart.js.</p>
+            <div id="usageChart" style="height: 200px; background-color: #f9f9f9; display: flex; align-items: center; justify-content: center;">
+                [Usage Chart Placeholder]
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h3>Predicted Reorder Dates</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Current Stock</th>
+                        <th>Usage Rate (per week)</th>
+                        <th>Predicted Empty Date</th>
+                        <th>Suggested Order Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Aluminum Foil Roll</td>
+                        <td>2</td>
+                        <td>0.5</td>
+                        <td>6/12/2025</td>
+                        <td>5/29/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Foodservice Film</td>
+                        <td>1</td>
+                        <td>0.75</td>
+                        <td>5/24/2025</td>
+                        <td class="stock-low">ORDER NOW</td>
+                    </tr>
+                    <!-- More predicted orders -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="pricing" class="tab-content">
+        <div class="inventory-controls">
+            <input type="text" id="pricingSearch" class="search-box" placeholder="Search products...">
+            <div class="action-buttons">
+                <button id="printPricing">Print Price List</button>
+            </div>
+        </div>
+        
+        <section>
+            <h2>Food Packaging</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Product Description</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>99047906</td>
+                        <td>Aluminum Foil Roll, Standard Weight, Silver, 18" x 500'</td>
+                        <td>$23.04</td>
+                    </tr>
+                    <tr>
+                        <td>99514695</td>
+                        <td>Foodservice Film, Standard, 18" x 2,000 ft BWK7204</td>
+                        <td>$20.55</td>
+                    </tr>
+                    <tr>
+                        <td>99350581</td>
+                        <td>Paper Wrap & Liner, 12 x 12 in, Brown, Parchment, 12 x 12in, 16400897</td>
+                        <td>$118.38</td>
+                    </tr>
+                    <tr>
+                        <td>99514966</td>
+                        <td>Round Aluminum To-Go Containers, 250 Gauge, 24 oz, 7" Diameter x 1.47" h, Silver, 500/Carton</td>
+                        <td>$50.25</td>
+                    </tr>
+                    <tr>
+                        <td>99028204</td>
+                        <td>Round Aluminum To-Go Container Lids, Flat Lid, 7", Silver, Paper, 500/Carton</td>
+                        <td>$22.80</td>
+                    </tr>
+                    <tr>
+                        <td>99028207</td>
+                        <td>Round Aluminum To-Go Container Lids, Dome Lid, 7", Clear, Plastic, 500/Carton</td>
+                        <td>$22.85</td>
+                    </tr>
+                    <tr>
+                        <td>99059114</td>
+                        <td>PE #1 FOLDED PAPER KRAFTCONTAINER 5X4.13X2.56, BBK-1</td>
+                        <td>$61.91</td>
+                    </tr>
+                    <tr>
+                        <td>99059117</td>
+                        <td>PE #4 FOLDED PAPER KRAFTCONTAINER 8.8X6.46X3.5, BBK-4</td>
+                        <td>$44.66</td>
+                    </tr>
+                    <tr>
+                        <td>99435243</td>
+                        <td>EcoSystems PP Round Deli Container, Translucent, 32 Oz, L8750169</td>
+                        <td>$63.38</td>
+                    </tr>
+                    <tr>
+                        <td>99435244</td>
+                        <td>EcoSystems PP Recessed Lid, Translucent, 8-32 Oz, L8750173</td>
+                        <td>$29.19</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2>Portion Cups & Lids</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Product Description</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>99059104</td>
+                        <td>Premier Essential PP Portion Cup Lid, Clear, 2 Oz, 34329</td>
+                        <td>$23.47</td>
+                    </tr>
+                    <tr>
+                        <td>99059110</td>
+                        <td>Premier Essential PP Portion Cup, Clear, 2 Oz, J0560220</td>
+                        <td>$28.26</td>
+                    </tr>
+                    <tr>
+                        <td>99059102</td>
+                        <td>3.25/4.5/5 PORTION LIDCLR PREMIER ES 20/125 74MM PET, PEL74</td>
+                        <td>$43.72</td>
+                    </tr>
+                    <tr>
+                        <td>99059106</td>
+                        <td>Premier Essential PP Portion Cup, Clear, 4 Oz, 34336</td>
+                        <td>$48.22</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2>Beverage Cups & Lids</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Product Description</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>99059075</td>
+                        <td>PE 12/14OZ PETECOLD CUPS 98MM CLEAR 20/50, BWC14-D98</td>
+                        <td>$49.32</td>
+                    </tr>
+                    <tr>
+                        <td>99059074</td>
+                        <td>PE 16-OZ PETECOLD CUPS 98MM CLEAR 20/50, BWC16-D98</td>
+                        <td>$54.52</td>
+                    </tr>
+                    <tr>
+                        <td>99059066</td>
+                        <td>PE FLAT LID W/HOLE98MM 12/14-24OZ CLEAR 20/50, BWLIDF98SS</td>
+                        <td>$36.08</td>
+                    </tr>
+                    <tr>
+                        <td>99031266</td>
+                        <td>PACIFIC HOT CUP 24OZSINGLEWALL PE PAPER WHITE</td>
+                        <td>$90.22</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2>Cutlery & Straws</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Product Description</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>99514846</td>
+                        <td>Heavyweight Polypropylene Cutlery, Fork, Plastic, Black, 1,000/Carton BWFFORKHWPPBLA</td>
+                        <td>$19.32</td>
+                    </tr>
+                    <tr>
+                        <td>99514885</td>
+                        <td>Wrapped Jumbo Straws, 7.75", Polypropylene, Clear, 12,000/Carton BWKJSTW775CLR</td>
+                        <td>$66.57</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2>Napkins & Paper Products</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Product Description</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>99039693</td>
+                        <td>BEVERAGE NAPKIN1 PLY, 9 X 9, WHITE 78000335</td>
+                        <td>$14.66</td>
+                    </tr>
+                    <tr>
+                        <td>99055640</td>
+                        <td>Dinner Napkin, 1/8 Fold, 2 Ply, 20/150 CS, 78000326</td>
+                        <td>$41.24</td>
+                    </tr>
+                    <tr>
+                        <td>99451284</td>
+                        <td>Right Choice Center Pull Towel, 10" X 7.30", 600 Sheets</td>
+                        <td>$30.03</td>
+                    </tr>
+                    <tr>
+                        <td>99451290</td>
+                        <td>Right Choice 2-Ply Jumbo Bath Tissue, 9in X 700ft</td>
+                        <td>$28.00</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2>Cleaning & Sanitation</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Product Description</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>99046933</td>
+                        <td>Super Sani-Cloth Germicidal Disposable Wipes, 1-Ply, 6 x 6.75, Unscented, White, 160/Canister</td>
+                        <td>$95.99</td>
+                    </tr>
+                    <tr>
+                        <td>99527091</td>
+                        <td>Wet-Nap Premoistened Towelettes, 1-Ply, 5 x 7.75, Unscented, White, 100/Pack, 10</td>
+                        <td>$43.95</td>
+                    </tr>
+                    <tr>
+                        <td>99394486</td>
+                        <td>Toilet Seat Cover 1/2-Fold, 10000054</td>
+                        <td>$38.11</td>
+                    </tr>
+                    <tr>
+                        <td>99455667</td>
+                        <td>SH Gloves Vinyl Powder Free X-Large White, BZ-30954</td>
+                        <td>$23.80</td>
+                    </tr>
+                    <tr>
+                        <td>99520620</td>
+                        <td>Linear Low-Density Can Liners, 16 gal, 0.7 mil, 24" x 32", Black, 500/Carton HERH4832HK</td>
+                        <td>$64.29</td>
+                    </tr>
+                    <tr>
+                        <td>99031054</td>
+                        <td>Right Choice LDPE Repro 60 Gal Can Liner, Black, 38" x 58", 1.5 Mil</td>
+                        <td>$40.64</td>
+                    </tr>
+                    <tr>
+                        <td>99514858</td>
+                        <td>Grill Brick, 8 x 4, Black, 12/Carton BWKGB12PC</td>
+                        <td>$30.21</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+    
+    <div id="order" class="tab-content">
+        <h2>Place Order</h2>
+        
+        <div class="inventory-controls">
+            <select id="orderType">
+                <option value="recommended">Recommended Order</option>
+                <option value="custom">Custom Order</option>
+                <option value="reorder">Reorder Previous</option>
+            </select>
+            <div class="action-buttons">
+                <button id="printOrder">Print Order</button>
+            </div>
+        </div>
+        
+        <div id="recommendedOrder">
+            <h3>Recommended Order Items</h3>
+            <p>Based on current inventory levels and usage patterns</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Add</th>
+                        <th>SKU</th>
+                        <th>Product</th>
+                        <th>Current Stock</th>
+                        <th>Par Level</th>
+                        <th>Order Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox" checked></td>
+                        <td>99514695</td>
+                        <td>Foodservice Film, Standard</td>
+                        <td class="stock-low">1</td>
+                        <td>4</td>
+                        <td><input type="number" value="3" min="1"></td>
+                        <td>$20.55</td>
+                        <td>$61.65</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" checked></td>
+                        <td>99059066</td>
+                        <td>PE FLAT LID W/HOLE98MM</td>
+                        <td class="stock-low">15</td>
+                        <td>50</td>
+                        <td><input type="number" value="35" min="1"></td>
+                        <td>$36.08</td>
+                        <td>$36.08</td>
+                    </tr>
+                    <!-- More items -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="7" style="text-align: right;"><strong>Order Total:</strong></td>
+                        <td><strong>$97.73</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <section class="contact-form">
+            <h2>Submit Order</h2>
+            <!-- Form is connected to your Formspree endpoint -->
+            <form id="orderForm" action="https://formspree.io/f/mrbprroj" method="POST">
+                <div class="form-group">
+                    <label for="name">Your Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="company">Restaurant/Company Name:</label>
+                    <input type="text" id="company" name="company" value="Woody's Brewing Company (322942)" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Order Details:</label>
+                    <textarea id="message" name="message" placeholder="Order will be automatically populated when you submit"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="deliveryDate">Requested Delivery Date:</label>
+                    <input type="date" id="deliveryDate" name="deliveryDate" required>
+                </div>
+                <!-- Add a hidden field for the form subject -->
+                <input type="hidden" name="_subject" value="New Order from Woody's Brewing Company Website">
+                <!-- Using Formspree's default thank you page -->
+                <button type="submit">Submit Order</button>
+            </form>
+        </section>
+    </div>
+    
+    </div><!-- End of container -->
+    
+    <footer>
+        <p>© 2025 Nigel at Route 33. All prices subject to change without notice.</p>
+        <p>For immediate assistance, please email: nigelwhaley@gmail.com</p>
+    </footer>
+
+    <script>
+        // Current customer ID
+        const customerId = "woodys-brewing-322942";
+        
+        // Initialize data
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date
+            const now = new Date();
+            document.getElementById('todayDate').textContent = (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear();
+            
+            // Setup tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and content
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    const contentId = tab.getAttribute('data-tab');
+                    document.getElementById(contentId).classList.add('active');
+                });
+            });
+            
+            // Setup search functionality
+            const searchInputs = document.querySelectorAll('.search-box');
+            searchInputs.forEach(input => {
+                input.addEventListener('keyup', function() {
+                    const searchValue = this.value.toLowerCase();
+                    const parentId = this.id.replace('Search', '');
+                    const items = document.querySelectorAll(`#${parentId} tr, #${parentId} .inventory-item, #${parentId} .checklist-item`);
+                    
+                    items.forEach(item => {
+                        const text = item.textContent.toLowerCase();
+                        if(text.includes(searchValue)) {
+                            item.style.display = '';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // Setup print functionality
+            document.getElementById('printInventory').addEventListener('click', () => {
+                window.print();
+            });
+            
+            document.getElementById('printChecklist').addEventListener('click', () => {
+                window.print();
+            });
+            
+            document.getElementById('printPricing').addEventListener('click', () => {
+                window.print();
+            });
+            
+            document.getElementById('printOrder').addEventListener('click', () => {
+                window.print();
+            });
+            
+            // Setup export functionality (exportable CSV data)
+            document.getElementById('exportInventory').addEventListener('click', () => {
+                exportToCSV('inventory');
+            });
+            
+            document.getElementById('exportAnalytics').addEventListener('click', () => {
+                exportToCSV('analytics');
+            });
+            
+            // Export data to CSV
+            function exportToCSV(type) {
+                let csvContent = "data:text/csv;charset=utf-8,";
+                let rows = [];
+                
+                if(type === 'inventory') {
+                    // Add header row
+                    rows.push(["SKU", "Category", "Description", "Current Stock", "Reorder Level", "Par Level", "Last Updated"]);
+                    
+                    // Add inventory data
+                    document.querySelectorAll('.inventory-item').forEach(item => {
+                        const sku = item.getAttribute('data-sku');
+                        const category = item.getAttribute('data-category');
+                        const description = item.querySelector('strong').textContent;
+                        const stock = item.querySelector('.stock-input').value;
+                        const reorder = item.querySelector('.reorder-input').value;
+                        const par = item.querySelector('.par-input').value;
+                        
+                        rows.push([sku, category, description, stock, reorder, par, new Date().toLocaleDateString()]);
+                    });
+                } else if (type === 'analytics') {
+                    // For analytics, we'll use the local data
+                    rows.push(["Item", "Current Stock", "Usage Rate", "Predicted Empty Date", "Suggested Order Date"]);
+                    
+                    // Sample data
+                    rows.push(["Aluminum Foil Roll", "2", "0.5", "6/12/2025", "5/29/2025"]);
+                    rows.push(["Foodservice Film", "1", "0.75", "5/24/2025", "ORDER NOW"]);
+                }
+                
+                // Format rows as CSV
+                rows.forEach(row => {
+                    csvContent += row.join(',') + "\r\n";
+                });
+                
+                // Create download link
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `${type}_export_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                
+                // Trigger download
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            // Setup checklist functionality
+            document.getElementById('checkAll').addEventListener('click', () => {
+                const checkboxes = document.querySelectorAll('.item-check');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+            });
+            
+            document.getElementById('saveFabChecklist').addEventListener('click', () => {
+                const checklistItems = document.querySelectorAll('.checklist-item');
+                const counts = [];
+                const checklistDate = document.getElementById('todayDate').textContent;
+                
+                checklistItems.forEach(item => {
+                    const sku = item.getAttribute('data-sku');
+                    const count = item.querySelector('.count-input').value;
+                    const checked = item.querySelector('.item-check').checked;
+                    
+                    counts.push({
+                        sku,
+                        count,
+                        checked,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    // Also update current inventory
+                    if(checked) {
+                        updateInventoryItem(sku, parseInt(count));
+                    }
+                });
+                
+                // Save checklist data to localStorage
+                const savedChecklists = JSON.parse(localStorage.getItem(`${customerId}_checklists`) || '{}');
+                savedChecklists[checklistDate] = {
+                    items: counts,
+                    timestamp: new Date().toISOString(),
+                    completed: true
+                };
+                localStorage.setItem(`${customerId}_checklists`, JSON.stringify(savedChecklists));
+                
+                // Also save to file for download
+                saveToFile(`checklist_${checklistDate.replace(/\//g, '-')}.json`, JSON.stringify(savedChecklists[checklistDate], null, 2));
+                
+                alert('Inventory checklist saved! A backup file has been downloaded to your computer.');
+            });
+            
+            // Function to save data to a file and download it
+            function saveToFile(filename, data) {
+                const blob = new Blob([data], {type: 'application/json'});
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }
+            
+            // Setup order form population
+            document.getElementById('orderForm').addEventListener('submit', function(e) {
+                // Populate the textarea with order details
+                const orderItems = document.querySelectorAll('#recommendedOrder tbody tr');
+                let orderText = "ORDER DETAILS:\n\n";
+                const orderData = {
+                    customerName: document.getElementById('company').value,
+                    contactName: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    deliveryDate: document.getElementById('deliveryDate').value,
+                    items: [],
+                    timestamp: new Date().toISOString(),
+                    status: 'new'
+                };
+                
+                orderItems.forEach(item => {
+                    const isAdded = item.querySelector('input[type="checkbox"]').checked;
+                    if(isAdded) {
+                        const sku = item.querySelector('td:nth-child(2)').textContent;
+                        const product = item.querySelector('td:nth-child(3)').textContent;
+                        const qty = item.querySelector('input[type="number"]').value;
+                        const price = item.querySelector('td:nth-child(7)').textContent;
+                        
+                        orderText += `SKU: ${sku} - ${product} - Qty: ${qty} - ${price} each\n`;
+                        
+                        orderData.items.push({
+                            sku,
+                            product,
+                            quantity: parseInt(qty),
+                            price: price.replace('$', '')
+                        });
+                    }
+                });
+                
+                orderText += "\nRequested Delivery: " + document.getElementById('deliveryDate').value;
+                document.getElementById('message').value = orderText;
+                
+                // Save order to localStorage
+                const savedOrders = JSON.parse(localStorage.getItem(`${customerId}_orders`) || '{}');
+                const orderId = 'order-' + Date.now();
+                savedOrders[orderId] = orderData;
+                localStorage.setItem(`${customerId}_orders`, JSON.stringify(savedOrders));
+                
+                // Also save to file for backup
+                saveToFile(`order_${orderId}.json`, JSON.stringify(orderData, null, 2));
+                
+                console.log('Order saved locally and backup file downloaded');
+                // The form will still submit to Formspree
+            });
+            
+            // Save all inventory items
+            document.getElementById('saveFabInventory').addEventListener('click', function() {
+                const inventoryItems = document.querySelectorAll('.inventory-item');
+                const savedInventory = {};
+                let updatedCount = 0;
+                
+                inventoryItems.forEach(item => {
+                    const sku = item.getAttribute('data-sku');
+                    const stockInput = item.querySelector('.stock-input');
+                    const reorderInput = item.querySelector('.reorder-input');
+                    const parInput = item.querySelector('.par-input');
+                    const stockLevel = item.querySelector('.stock-level');
+                    
+                    const currentStock = parseInt(stockInput.value);
+                    const reorderLevel = parseInt(reorderInput.value);
+                    const parLevel = parseInt(parInput.value);
+                    
+                    // Update status indicator
+                    if(currentStock <= reorderLevel) {
+                        stockLevel.className = 'stock-level stock-low';
+                        stockLevel.textContent = 'LOW';
+                    } else if(currentStock <= parLevel) {
+                        stockLevel.className = 'stock-level stock-medium';
+                        stockLevel.textContent = 'MEDIUM';
+                    } else {
+                        stockLevel.className = 'stock-level stock-high';
+                        stockLevel.textContent = 'HIGH';
+                    }
+                    
+                    // Add to saved data
+                    savedInventory[sku] = {
+                        sku,
+                        category: item.getAttribute('data-category'),
+                        description: item.querySelector('strong').textContent,
+                        stock: currentStock,
+                        reorderLevel,
+                        parLevel,
+                        lastUpdated: new Date().toISOString()
+                    };
+                    updatedCount++;
+                });
+                
+                // Save all to localStorage
+                localStorage.setItem(`${customerId}_inventory`, JSON.stringify(savedInventory));
+                
+                // Also save to file for backup
+                saveToFile(`inventory_${customerId}_${new Date().toISOString().split('T')[0]}.json`, 
+                           JSON.stringify(savedInventory, null, 2));
+                
+                alert(`${updatedCount} inventory items updated successfully!`);
+            });
+            
+            // Function to update a single inventory item
+            function updateInventoryItem(sku, newCount) {
+                const inventoryItem = document.querySelector(`.inventory-item[data-sku="${sku}"]`);
+                if(inventoryItem) {
+                    const stockInput = inventoryItem.querySelector('.stock-input');
+                    const reorderLevel = parseInt(inventoryItem.querySelector('.reorder-input').value);
+                    const parLevel = parseInt(inventoryItem.querySelector('.par-input').value);
+                    const stockLevel = inventoryItem.querySelector('.stock-level');
+                    
+                    stockInput.value = newCount;
+                    
+                    // Update status indicator
+                    if(newCount <= reorderLevel) {
+                        stockLevel.className = 'stock-level stock-low';
+                        stockLevel.textContent = 'LOW';
+                    } else if(newCount <= parLevel) {
+                        stockLevel.className = 'stock-level stock-medium';
+                        stockLevel.textContent = 'MEDIUM';
+                    } else {
+                        stockLevel.className = 'stock-level stock-high';
+                        stockLevel.textContent = 'HIGH';
+                    }
+                    
+                    // Update in localStorage
+                    const savedInventory = JSON.parse(localStorage.getItem(`${customerId}_inventory`) || '{}');
+                    if(savedInventory[sku]) {
+                        savedInventory[sku].stock = newCount;
+                        savedInventory[sku].lastUpdated = new Date().toISOString();
+                        localStorage.setItem(`${customerId}_inventory`, JSON.stringify(savedInventory));
+                    }
+                }
+            }
+            
+            // Load inventory data from localStorage
+            function loadInventoryData() {
+                const savedInventory = JSON.parse(localStorage.getItem(`${customerId}_inventory`) || '{}');
+                
+                // If no data exists, initialize with current UI data
+                if(Object.keys(savedInventory).length === 0) {
+                    initializeInventoryData();
+                    return;
+                }
+                
+                // Update UI with localStorage data
+                Object.keys(savedInventory).forEach(sku => {
+                    const item = savedInventory[sku];
+                    const inventoryItem = document.querySelector(`.inventory-item[data-sku="${sku}"]`);
+                    if(inventoryItem) {
+                        inventoryItem.querySelector('.stock-input').value = item.stock;
+                        inventoryItem.querySelector('.reorder-input').value = item.reorderLevel;
+                        inventoryItem.querySelector('.par-input').value = item.parLevel;
+                        
+                        // Update status
+                        const stockLevel = inventoryItem.querySelector('.stock-level');
+                        const currentStock = parseInt(item.stock);
+                        const reorderLevel = parseInt(item.reorderLevel);
+                        const parLevel = parseInt(item.parLevel);
+                        
+                        if(currentStock <= reorderLevel) {
+                            stockLevel.className = 'stock-level stock-low';
+                            stockLevel.textContent = 'LOW';
+                        } else if(currentStock <= parLevel) {
+                            stockLevel.className = 'stock-level stock-medium';
+                            stockLevel.textContent = 'MEDIUM';
+                        } else {
+                            stockLevel.className = 'stock-level stock-high';
+                            stockLevel.textContent = 'HIGH';
+                        }
+                    }
+                });
+            }
+            
+            // Initialize localStorage with data from UI
+            function initializeInventoryData() {
+                const inventoryItems = document.querySelectorAll('.inventory-item');
+                const inventoryData = {};
+                
+                inventoryItems.forEach(item => {
+                    const sku = item.getAttribute('data-sku');
+                    const category = item.getAttribute('data-category');
+                    const description = item.querySelector('strong').textContent;
+                    const stock = parseInt(item.querySelector('.stock-input').value);
+                    const reorderLevel = parseInt(item.querySelector('.reorder-input').value);
+                    const parLevel = parseInt(item.querySelector('.par-input').value);
+                    
+                    inventoryData[sku] = {
+                        sku,
+                        category,
+                        description,
+                        stock,
+                        reorderLevel,
+                        parLevel,
+                        lastUpdated: new Date().toISOString()
+                    };
+                });
+                
+                localStorage.setItem(`${customerId}_inventory`, JSON.stringify(inventoryData));
+            }
+            
+            // Call this on page load to set initial data
+            loadInventoryData();
+
+            // Quick feature to clone for multiple customers
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+Shift+C to open customer ID prompt
+                if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                    const newCustomerId = prompt("Enter new customer ID to clone this system:", "");
+                    if (newCustomerId) {
+                        localStorage.setItem('lastCustomerId', newCustomerId);
+                        alert(`System cloned for customer: ${newCustomerId}\nRefresh the page to work with this customer.`);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
