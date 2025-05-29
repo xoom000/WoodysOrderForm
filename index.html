@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Order Form - Woody's Brewing</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background-color: #c51230;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .customer-info {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+        
+        .customer-info input {
+            font-size: 18px;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+            max-width: 100%;
+        }
+        
+        .category {
+            background: white;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .category-header {
+            background-color: #333;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .category-header:hover {
+            background-color: #555;
+        }
+        
+        .category-count {
+            background-color: #c51230;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        
+        .category-items {
+            display: none;
+            padding: 10px;
+        }
+        
+        .category.active .category-items {
+            display: block;
+        }
+        
+        .item {
+            display: grid;
+            grid-template-columns: 80px 1fr 100px 80px;
+            gap: 10px;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        
+        .item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .item-sku {
+            font-weight: bold;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .item-desc {
+            font-size: 14px;
+        }
+        
+        .item-price {
+            text-align: right;
+            color: #c51230;
+            font-weight: bold;
+        }
+        
+        .item-qty {
+            width: 60px;
+            padding: 5px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .item-qty:focus {
+            border-color: #c51230;
+            outline: none;
+        }
+        
+        .item-qty.has-value {
+            background-color: #e8f5e9;
+            border-color: #4caf50;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #c51230;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #a30f27;
+        }
+        
+        .btn-secondary {
+            background-color: #666;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #555;
+        }
+        
+        .item-count {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-left: auto;
+        }
+        
+        .search-box {
+            padding: 10px;
+            background: white;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .search-box input:focus {
+            border-color: #c51230;
+            outline: none;
+        }
+        
+        .success-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #4caf50;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .item {
+                grid-template-columns: 1fr 80px;
+                gap: 5px;
+            }
+            
+            .item-sku, .item-price {
+                display: none;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            .item-count {
+                width: 100%;
+                text-align: center;
+                margin: 10px 0 0 0;
+            }
+        }
+        
+        .expand-all {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 14px;
+            background: white;
+            color: #c51230;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .expand-all:hover {
+            background: #f5f5f5;
+        }
+
+        /* Style for order summary */
+        #orderSummary {
+            white-space: pre-wrap;
+            font-family: monospace;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Quick Order Form</h1>
+        <span class="expand-all" onclick="toggleAllCategories()">Expand/Collapse All</span>
+    </div>
+    
+    <div class="customer-info">
+        <label>Customer Name: </label>
+        <input type="text" id="customerName" placeholder="Enter customer name..." value="Woody's Brewing Company">
+    </div>
+    
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search by SKU, description, or keyword..." onkeyup="searchProducts()">
+    </div>
+    
+    <div id="categories"></div>
+    
+    <div style="height: 80px;"></div>
+    
+    <div class="controls">
+        <button class="btn btn-primary" onclick="generateOrder()">Generate Order & Copy</button>
+        <button class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+        <button class="btn btn-secondary" onclick="saveToFile()">Save Order</button>
+        <span class="item-count">Items: <span id="itemCount">0</span></span>
+    </div>
+    
+    <div class="success-message" id="successMessage">Order copied to clipboard!</div>
+    
+    <script>
+        // Product data - I'll embed your most common products here
+        // You can customize this list for each customer
+        const products = [
+            // Food Packaging
+            { sku: "99047906", desc: "Aluminum Foil Roll, Standard Weight, Silver, 18\" x 500'", price: "$23.04", category: "Food Packaging" },
+            { sku: "99514695", desc: "Foodservice Film, Standard, 18\" x 2,000 ft BWK7204", price: "$20.55", category: "Food Packaging" },
+            { sku: "99350581", desc: "Paper Wrap & Liner, 12 x 12 in, Brown, Parchment", price: "$118.38", category: "Food Packaging" },
+            { sku: "99514966", desc: "Round Aluminum To-Go Containers, 250 Gauge, 24 oz, 7\" Diameter", price: "$50.25", category: "Food Packaging" },
+            { sku: "99028204", desc: "Round Aluminum To-Go Container Lids, Flat Lid, 7\", Silver", price: "$22.80", category: "Food Packaging" },
+            { sku: "99028207", desc: "Round Aluminum To-Go Container Lids, Dome Lid, 7\", Clear", price: "$22.85", category: "Food Packaging" },
+            { sku: "99059114", desc: "PE #1 FOLDED PAPER KRAFT CONTAINER 5X4.13X2.56", price: "$61.91", category: "Food Packaging" },
+            { sku: "99059117", desc: "PE #4 FOLDED PAPER KRAFT CONTAINER 8.8X6.46X3.5", price: "$44.66", category: "Food Packaging" },
+            { sku: "99435243", desc: "EcoSystems PP Round Deli Container, Translucent, 32 Oz", price: "$63.38", category: "Food Packaging" },
+            { sku: "99435244", desc: "EcoSystems PP Recessed Lid, Translucent, 8-32 Oz", price: "$29.19", category: "Food Packaging" },
+            
+            // Portion Cups & Lids
+            { sku: "99059104", desc: "Premier Essential PP Portion Cup Lid, Clear, 2 Oz", price: "$23.47", category: "Portion Cups" },
+            { sku: "99059110", desc: "Premier Essential PP Portion Cup, Clear, 2 Oz", price: "$28.26", category: "Portion Cups" },
+            { sku: "99059102", desc: "3.25/4.5/5 PORTION LID CLR PREMIER ES 20/125 74MM PET", price: "$43.72", category: "Portion Cups" },
+            { sku: "99059106", desc: "Premier Essential PP Portion Cup, Clear, 4 Oz", price: "$48.22", category: "Portion Cups" },
+            
+            // Beverage Cups & Lids
+            { sku: "99059075", desc: "PE 12/14OZ PETE COLD CUPS 98MM CLEAR 20/50", price: "$49.32", category: "Beverage Cups" },
+            { sku: "99059074", desc: "PE 16-OZ PETE COLD CUPS 98MM CLEAR 20/50", price: "$54.52", category: "Beverage Cups" },
+            { sku: "99059066", desc: "PE FLAT LID W/HOLE 98MM 12/14-24OZ CLEAR 20/50", price: "$36.08", category: "Beverage Cups" },
+            { sku: "99031266", desc: "PACIFIC HOT CUP 24OZ SINGLEWALL PE PAPER WHITE", price: "$90.22", category: "Beverage Cups" },
+            
+            // Cutlery & Straws
+            { sku: "99514846", desc: "Heavyweight Polypropylene Cutlery, Fork, Black, 1,000/Carton", price: "$19.32", category: "Cutlery" },
+            { sku: "99514885", desc: "Wrapped Jumbo Straws, 7.75\", Polypropylene, Clear, 12,000/Carton", price: "$66.57", category: "Cutlery" },
+            
+            // Napkins & Paper Products
+            { sku: "99039693", desc: "BEVERAGE NAPKIN 1 PLY, 9 X 9, WHITE", price: "$14.66", category: "Paper Products" },
+            { sku: "99055640", desc: "Dinner Napkin, 1/8 Fold, 2 Ply, 20/150 CS", price: "$41.24", category: "Paper Products" },
+            { sku: "99451284", desc: "Right Choice Center Pull Towel, 10\" X 7.30\", 600 Sheets", price: "$30.03", category: "Paper Products" },
+            { sku: "99451290", desc: "Right Choice 2-Ply Jumbo Bath Tissue, 9in X 700ft", price: "$28.00", category: "Paper Products" },
+            
+            // Cleaning & Sanitation
+            { sku: "99046933", desc: "Super Sani-Cloth Germicidal Disposable Wipes, 160/Canister", price: "$95.99", category: "Cleaning" },
+            { sku: "99527091", desc: "Wet-Nap Premoistened Towelettes, 1-Ply, 5 x 7.75, 100/Pack", price: "$43.95", category: "Cleaning" },
+            { sku: "99394486", desc: "Toilet Seat Cover 1/2-Fold", price: "$38.11", category: "Cleaning" },
+            { sku: "99455667", desc: "SH Gloves Vinyl Powder Free X-Large White", price: "$23.80", category: "Cleaning" },
+            { sku: "99520620", desc: "Linear Low-Density Can Liners, 16 gal, 0.7 mil, 24\" x 32\", Black", price: "$64.29", category: "Cleaning" },
+            { sku: "99031054", desc: "Right Choice LDPE Repro 60 Gal Can Liner, Black, 38\" x 58\", 1.5 Mil", price: "$40.64", category: "Cleaning" },
+            { sku: "99514858", desc: "Grill Brick, 8 x 4, Black, 12/Carton", price: "$30.21", category: "Cleaning" }
+        ];
+        
+        // Group products by category
+        const categories = {};
+        products.forEach(product => {
+            if (!categories[product.category]) {
+                categories[product.category] = [];
+            }
+            categories[product.category].push(product);
+        });
+        
+        // Initialize the form
+        function initializeForm() {
+            const container = document.getElementById('categories');
+            container.innerHTML = '';
+            
+            Object.keys(categories).forEach(categoryName => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+                categoryDiv.dataset.category = categoryName;
+                
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'category-header';
+                headerDiv.onclick = () => toggleCategory(categoryDiv);
+                headerDiv.innerHTML = `
+                    <span>${categoryName}</span>
+                    <span class="category-count" id="count-${categoryName.replace(/\s+/g, '-')}">0</span>
+                `;
+                
+                const itemsDiv = document.createElement('div');
+                itemsDiv.className = 'category-items';
+                
+                categories[categoryName].forEach(product => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'item';
+                    itemDiv.dataset.searchText = `${product.sku} ${product.desc} ${product.category}`.toLowerCase();
+                    itemDiv.innerHTML = `
+                        <span class="item-sku">${product.sku}</span>
+                        <span class="item-desc">${product.desc}</span>
+                        <span class="item-price">${product.price}</span>
+                        <input type="number" 
+                               class="item-qty" 
+                               data-sku="${product.sku}" 
+                               data-desc="${product.desc}"
+                               data-price="${product.price}"
+                               data-category="${product.category}"
+                               placeholder="0" 
+                               min="0" 
+                               onchange="updateCount()"
+                               onkeyup="updateCount()">
+                    `;
+                    itemsDiv.appendChild(itemDiv);
+                });
+                
+                categoryDiv.appendChild(headerDiv);
+                categoryDiv.appendChild(itemsDiv);
+                container.appendChild(categoryDiv);
+            });
+            
+            // Load saved data if exists
+            loadSavedData();
+        }
+        
+        function toggleCategory(categoryDiv) {
+            categoryDiv.classList.toggle('active');
+        }
+        
+        function toggleAllCategories() {
+            const categories = document.querySelectorAll('.category');
+            const allActive = Array.from(categories).every(cat => cat.classList.contains('active'));
+            
+            categories.forEach(cat => {
+                if (allActive) {
+                    cat.classList.remove('active');
+                } else {
+                    cat.classList.add('active');
+                }
+            });
+        }
+        
+        function updateCount() {
+            const inputs = document.querySelectorAll('.item-qty');
+            let totalCount = 0;
+            const categoryCounts = {};
+            
+            inputs.forEach(input => {
+                const value = parseInt(input.value) || 0;
+                if (value > 0) {
+                    totalCount++;
+                    input.classList.add('has-value');
+                    const category = input.dataset.category;
+                    categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+                } else {
+                    input.classList.remove('has-value');
+                }
+            });
+            
+            document.getElementById('itemCount').textContent = totalCount;
+            
+            // Update category counts
+            Object.keys(categories).forEach(categoryName => {
+                const count = categoryCounts[categoryName] || 0;
+                const countElement = document.getElementById(`count-${categoryName.replace(/\s+/g, '-')}`);
+                if (countElement) {
+                    countElement.textContent = count;
+                }
+            });
+            
+            // Save data
+            saveData();
+        }
+        
+        function generateOrder() {
+            const customerName = document.getElementById('customerName').value || 'Unknown Customer';
+            const date = new Date().toLocaleDateString();
+            const inputs = document.querySelectorAll('.item-qty');
+            let orderText = `ORDER FORM\n`;
+            orderText += `Customer: ${customerName}\n`;
+            orderText += `Date: ${date}\n`;
+            orderText += `================================\n\n`;
+            
+            let hasItems = false;
+            let currentCategory = '';
+            
+            inputs.forEach(input => {
+                const qty = parseInt(input.value) || 0;
+                if (qty > 0) {
+                    hasItems = true;
+                    const category = input.dataset.category;
+                    
+                    if (category !== currentCategory) {
+                        if (currentCategory) orderText += '\n';
+                        orderText += `--- ${category} ---\n`;
+                        currentCategory = category;
+                    }
+                    
+                    orderText += `${input.dataset.sku} - ${qty} - ${input.dataset.desc}\n`;
+                }
+            });
+            
+            if (!hasItems) {
+                alert('Please add at least one item to the order!');
+                return;
+            }
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(orderText).then(() => {
+                // Show success message
+                const successMsg = document.getElementById('successMessage');
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 2000);
+            }).catch(err => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = orderText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const successMsg = document.getElementById('successMessage');
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 2000);
+            });
+        }
+        
+        function clearAll() {
+            if (confirm('Clear all quantities?')) {
+                document.querySelectorAll('.item-qty').forEach(input => {
+                    input.value = '';
+                });
+                updateCount();
+            }
+        }
+        
+        function searchProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const items = document.querySelectorAll('.item');
+            const categories = document.querySelectorAll('.category');
+            
+            if (searchTerm === '') {
+                // Show all items and collapse categories
+                items.forEach(item => item.style.display = 'grid');
+                categories.forEach(cat => cat.classList.remove('active'));
+            } else {
+                // Hide categories that don't have matching items
+                categories.forEach(cat => {
+                    const categoryItems = cat.querySelectorAll('.item');
+                    let hasVisibleItems = false;
+                    
+                    categoryItems.forEach(item => {
+                        if (item.dataset.searchText.includes(searchTerm)) {
+                            item.style.display = 'grid';
+                            hasVisibleItems = true;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                    
+                    if (hasVisibleItems) {
+                        cat.classList.add('active');
+                        cat.style.display = 'block';
+                    } else {
+                        cat.style.display = 'none';
+                    }
+                });
+            }
+        }
+        
+        function saveData() {
+            const data = {
+                customerName: document.getElementById('customerName').value,
+                items: {}
+            };
+            
+            document.querySelectorAll('.item-qty').forEach(input => {
+                if (input.value) {
+                    data.items[input.dataset.sku] = input.value;
+                }
+            });
+            
+            localStorage.setItem('orderFormData', JSON.stringify(data));
+        }
+        
+        function loadSavedData() {
+            const saved = localStorage.getItem('orderFormData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                
+                if (data.customerName) {
+                    document.getElementById('customerName').value = data.customerName;
+                }
+                
+                Object.keys(data.items).forEach(sku => {
+                    const input = document.querySelector(`[data-sku="${sku}"]`);
+                    if (input) {
+                        input.value = data.items[sku];
+                    }
+                });
+                
+                updateCount();
+            }
+        }
+        
+        function saveToFile() {
+            const customerName = document.getElementById('customerName').value || 'order';
+            const date = new Date().toISOString().split('T')[0];
+            const filename = `${customerName.replace(/\s+/g, '_')}_order_${date}.txt`;
+            
+            const orderText = generateOrderText();
+            if (!orderText) return;
+            
+            const blob = new Blob([orderText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function generateOrderText() {
+            const customerName = document.getElementById('customerName').value || 'Unknown Customer';
+            const date = new Date().toLocaleDateString();
+            const inputs = document.querySelectorAll('.item-qty');
+            let orderText = `ORDER FORM\n`;
+            orderText += `Customer: ${customerName}\n`;
+            orderText += `Date: ${date}\n`;
+            orderText += `================================\n\n`;
+            
+            let hasItems = false;
+            let currentCategory = '';
+            
+            inputs.forEach(input => {
+                const qty = parseInt(input.value) || 0;
+                if (qty > 0) {
+                    hasItems = true;
+                    const category = input.dataset.category;
+                    
+                    if (category !== currentCategory) {
+                        if (currentCategory) orderText += '\n';
+                        orderText += `--- ${category} ---\n`;
+                        currentCategory = category;
+                    }
+                    
+                    orderText += `${input.dataset.sku} - ${qty} - ${input.dataset.desc}\n`;
+                }
+            });
+            
+            if (!hasItems) {
+                alert('Please add at least one item to the order!');
+                return null;
+            }
+            
+            return orderText;
+        }
+        
+        // Initialize on load
+        window.onload = () => {
+            initializeForm();
+        };
+    </script>
+</body>
+</html>
